@@ -96,3 +96,13 @@ export async function joinRoom(formData: FormData) {
 
     redirect(`/game/${code}`)
 }
+
+export async function getGamesCount() {
+    const supabase = await createClient()
+    // count: 'exact' nos devuelve el número total sin traerse todos los datos (rápido y liviano)
+    const { count } = await supabase
+        .from('rooms')
+        .select('*', { count: 'exact', head: true })
+
+    return count || 0
+}

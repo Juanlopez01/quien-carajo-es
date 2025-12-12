@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import confetti from 'canvas-confetti'
 import { Character } from '@/lib/data/characters'
 import CharacterCard from '@/components/game/CharacterCard'
-import GuessModal from '@/components/game/GuessModal' // <--- NUEVO
+import GuessModal from '@/components/game/GuessModal'
 import { useGameStore } from '@/store/useGameStore'
 import { useRealtimeGame } from '@/hooks/useRealtimeGame'
-import { sendQuestion, sendAnswer, guessCharacter } from '@/app/actions/game-actions' // <--- NUEVO
+import { sendQuestion, sendAnswer, guessCharacter } from '@/app/actions/game-actions'
 import Image from 'next/image'
-import { Send, User, ThumbsUp, ThumbsDown, AlertTriangle, Trophy, Skull } from 'lucide-react'
+import { Send, User, ThumbsUp, ThumbsDown, AlertTriangle, Trophy, Skull, MessageCircle, Copy, Check } from 'lucide-react' // <--- ÍCONOS NUEVOS
 
 interface Props {
     roomCode: string
@@ -24,7 +25,8 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
     const { status, currentTurn, turnPhase, messages, winnerId } = useRealtimeGame(roomId, initialStatus)
 
     const [msgInput, setMsgInput] = useState('')
-    const [isGuessModalOpen, setIsGuessModalOpen] = useState(false) // <--- NUEVO
+    const [isGuessModalOpen, setIsGuessModalOpen] = useState(false)
+    const [copied, setCopied] = useState(false) // <--- Estado para feedback de copiado
     const chatEndRef = useRef<HTMLDivElement>(null)
 
     const isMyTurn = currentTurn === userId
@@ -35,40 +37,70 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
 
-    // Lógica para arriesgar
+    // --- LÓGICA DE COMPARTIR ---
+    const getInviteLink = () => {
+        // Usamos window.location.origin para obtener el dominio actual (localhost o vercel)
+        if (typeof window !== 'undefined') {
+            return `${window.location.origin}/game/${roomCode}`
+        }
+        return ''
+    }
+
+    const handleWhatsApp = () => {
+        const link = getInviteLink()
+        const text = `¡Jugá conmigo a Quién Carajo Es! 🕵️‍♂️🇦🇷\n\nEntrá acá para jugar contra mí: ${link}`
+        const url = `https://wa.me/?text=${encodeURIComponent(text)}`
+        window.open(url, '_blank')
+    }
+
+    const handleCopyLink = async () => {
+        const link = getInviteLink()
+        try {
+            await navigator.clipboard.writeText(link)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000) // Resetear a los 2 seg
+        } catch (err) {
+            console.error('Error al copiar', err)
+        }
+    }
+
     const handleGuess = async (charId: string) => {
         setIsGuessModalOpen(false)
         await guessCharacter(roomId, charId)
-        // No hace falta hacer más nada, el realtime actualizará el status a 'finished'
     }
 
-    // --- PANTALLA DE GAME OVER ---
+    // --- GAME OVER ---
     if (isFinished) {
         const IWon = winnerId === userId
+        if (IWon) {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6, x: 0.1 }, colors: ['#FACC15', '#ffffff', '#38bdf8'] })
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6, x: 0.9 }, colors: ['#FACC15', '#ffffff', '#38bdf8'] })
+        }
+
         return (
             <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-950 text-white p-4">
-                <div className="text-center space-y-6 animate-in zoom-in duration-500">
+                <div className="text-center space-y-6 animate-in zoom-in duration-500 relative z-10">
                     {IWon ? (
                         <>
-                            <Trophy className="w-32 h-32 text-yellow-400 mx-auto drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
-                            <h1 className="text-6xl font-black text-yellow-400 uppercase tracking-tighter">
-                                ¡GANASTE!
-                            </h1>
-                            <p className="text-xl text-slate-300">Sos el detective del año 🕵️‍♂️🇦🇷</p>
+                            <div className="relative inline-block">
+                                <Trophy className="w-32 h-32 text-yellow-400 mx-auto drop-shadow-[0_0_25px_rgba(250,204,21,0.6)] animate-bounce" />
+                                <div className="absolute inset-0 bg-yellow-500 blur-3xl opacity-20 -z-10 rounded-full"></div>
+                            </div>
+                            <h1 className="text-6xl md:text-8xl font-black text-yellow-400 uppercase tracking-tighter drop-shadow-xl">¡GANASTE!</h1>
+                            <p className="text-xl md:text-2xl text-slate-300 font-medium">Sos el detective del año 🕵️‍♂️🇦🇷</p>
                         </>
                     ) : (
                         <>
-                            <Skull className="w-32 h-32 text-red-600 mx-auto" />
-                            <h1 className="text-6xl font-black text-red-600 uppercase tracking-tighter">
-                                PERDISTE
-                            </h1>
-                            <p className="text-xl text-slate-400">Te bailaron sabroso 💀</p>
+                            <Skull className="w-32 h-32 text-red-600 mx-auto animate-pulse" />
+                            <h1 className="text-6xl md:text-8xl font-black text-red-600 uppercase tracking-tighter drop-shadow-xl">PERDISTE</h1>
+                            <p className="text-xl md:text-2xl text-slate-400 font-medium">Te bailaron sabroso 💀</p>
                         </>
                     )}
-
-                    <a href="/" className="inline-block mt-8 px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-colors">
-                        Volver al Lobby
-                    </a>
+                    <div className="pt-8">
+                        <a href="/" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-black uppercase tracking-widest transition-all hover:scale-105 border border-slate-700">
+                            Jugar Otra Vez
+                        </a>
+                    </div>
                 </div>
             </div>
         )
@@ -76,29 +108,33 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
 
     return (
         <div className="flex h-screen w-full flex-col md:flex-row bg-slate-950 text-white overflow-hidden">
+            <GuessModal isOpen={isGuessModalOpen} onClose={() => setIsGuessModalOpen(false)} onGuess={handleGuess} board={board} />
 
-            {/* MODAL DE ARRIESGAR */}
-            <GuessModal
-                isOpen={isGuessModalOpen}
-                onClose={() => setIsGuessModalOpen(false)}
-                onGuess={handleGuess}
-                board={board}
-            />
-
-            {/* --- 1. IZQUIERDA: TU PERSONAJE --- */}
+            {/* --- 1. IZQUIERDA: SIDEBAR (Desktop) --- */}
             <aside className="hidden md:flex w-72 flex-col items-center border-r border-slate-800 bg-slate-900 p-6 z-10 shrink-0">
-                <h1 className="mb-6 text-2xl font-black text-yellow-400 uppercase text-center leading-none">
-                    Quién<br />Carajo<br />Es?
-                </h1>
-                <div className="w-full space-y-2 rounded-xl bg-black/20 p-4 border border-slate-800">
-                    <div className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                        Tu Secreto
-                    </div>
+                <h1 className="mb-6 text-2xl font-black text-yellow-400 uppercase text-center leading-none">Quién<br />Carajo<br />Es?</h1>
+                <div className="w-full space-y-2 rounded-xl bg-black/20 p-4 border border-slate-800 mb-6">
+                    <div className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">Tu Secreto</div>
                     <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg border-2 border-yellow-500/50 shadow-lg">
                         <Image src={mySecret.image} alt={mySecret.name} fill className="object-cover" />
                     </div>
                     <div className="text-center font-bold uppercase text-white">{mySecret.name}</div>
                 </div>
+
+                {/* INVITAR AMIGO (VERSION DESKTOP) */}
+                {isWaitingOpponent && (
+                    <div className="w-full animate-pulse space-y-3">
+                        <div className="text-xs text-center text-slate-400 uppercase tracking-widest">Invitar Amigo</div>
+                        <button onClick={handleWhatsApp} className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-transform hover:scale-105 shadow-lg shadow-green-900/20">
+                            <MessageCircle size={20} /> Enviar WhatsApp
+                        </button>
+                        <button onClick={handleCopyLink} className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors border border-slate-700">
+                            {copied ? <Check size={20} className="text-green-400" /> : <Copy size={20} />}
+                            {copied ? "¡Copiado!" : "Copiar Link"}
+                        </button>
+                    </div>
+                )}
+
                 <div className="mt-auto text-xs text-slate-600">Sala: {roomCode}</div>
             </aside>
 
@@ -134,28 +170,36 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
             </div>
 
             {/* --- 3. DERECHA: CHAT & ACCIONES --- */}
-            <aside className="flex h-[35vh] md:h-auto md:w-80 w-full flex-col border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900 shrink-0 z-20">
-
-                {/* Header Chat + Botón ARRIESGAR Mobile/Desktop */}
+            <aside className="flex h-[40vh] md:h-auto md:w-80 w-full flex-col border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900 shrink-0 z-20">
                 <div className="p-2 border-b border-slate-800 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-400 px-2">
-                        <User size={16} /> Chat
-                    </div>
-
-                    {/* BOTÓN ARRIESGAR (Solo visible si es mi turno y estoy preguntando) */}
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-400 px-2"><User size={16} /> Chat</div>
                     {isMyTurn && turnPhase === 'asking' && (
-                        <button
-                            onClick={() => setIsGuessModalOpen(true)}
-                            className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-lg animate-pulse"
-                        >
+                        <button onClick={() => setIsGuessModalOpen(true)} className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-lg animate-pulse">
                             <AlertTriangle size={12} /> ARRIESGAR
                         </button>
                     )}
                 </div>
 
+                {/* ZONA DE MENSAJES */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-900/50">
-                    {messages.length === 0 && <div className="text-center text-xs text-slate-600 mt-4">La partida comienza...</div>}
-                    {messages.map((msg) => {
+                    {/* Si estamos esperando, mostramos botones GRANDES de invitación aquí también (Mobile Friendly) */}
+                    {isWaitingOpponent && (
+                        <div className="flex flex-col items-center justify-center h-full space-y-4 animate-in zoom-in duration-300">
+                            <p className="text-center text-sm text-slate-400 max-w-[200px]">
+                                Nadie se unió todavía.<br />¡Mandale el link a un amigo!
+                            </p>
+                            <button onClick={handleWhatsApp} className="w-full max-w-[240px] bg-[#25D366] hover:bg-[#20bd5a] text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-green-900/20 active:scale-95 transition-all">
+                                <MessageCircle size={20} /> Enviar WhatsApp
+                            </button>
+                            <button onClick={handleCopyLink} className="w-full max-w-[240px] bg-slate-800 border border-slate-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
+                                {copied ? <Check size={20} className="text-green-400" /> : <Copy size={20} />}
+                                {copied ? "¡Link Copiado!" : "Copiar Link"}
+                            </button>
+                        </div>
+                    )}
+
+                    {!isWaitingOpponent && messages.length === 0 && <div className="text-center text-xs text-slate-600 mt-4">La partida comienza...</div>}
+                    {!isWaitingOpponent && messages.map((msg) => {
                         const isMe = msg.sender_id === userId
                         return (
                             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
@@ -168,29 +212,27 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
                     <div ref={chatEndRef} />
                 </div>
 
+                {/* INPUTS / BOTONES DE JUEGO */}
                 <div className="p-3 bg-slate-950 border-t border-slate-800">
-                    {/* A. INPUT PREGUNTA */}
-                    {isMyTurn && turnPhase === 'asking' && (
-                        <form onSubmit={async (e) => {
-                            e.preventDefault(); if (!msgInput.trim()) return;
-                            const text = msgInput; setMsgInput(''); await sendQuestion(roomId, text);
-                        }} className="flex gap-2">
+                    {!isWaitingOpponent && isMyTurn && turnPhase === 'asking' && (
+                        <form onSubmit={async (e) => { e.preventDefault(); if (!msgInput.trim()) return; const text = msgInput; setMsgInput(''); await sendQuestion(roomId, text); }} className="flex gap-2">
                             <input autoFocus type="text" value={msgInput} onChange={(e) => setMsgInput(e.target.value)} placeholder="¿Es rubio?" className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-3 text-sm focus:border-yellow-400 outline-none transition-colors" />
                             <button type="submit" className="bg-yellow-500 text-black p-3 rounded-lg font-bold hover:bg-yellow-400"><Send size={18} /></button>
                         </form>
                     )}
 
-                    {/* B. BOTONES RESPUESTA */}
-                    {!isMyTurn && turnPhase === 'answering' && (
+                    {!isWaitingOpponent && !isMyTurn && turnPhase === 'answering' && (
                         <div className="flex gap-2 animate-in fade-in slide-in-from-bottom-2">
                             <button onClick={() => sendAnswer(roomId, 'SÍ')} className="flex-1 bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl font-black text-sm md:text-lg shadow-lg flex items-center justify-center gap-2"><ThumbsUp size={18} /> SÍ</button>
                             <button onClick={() => sendAnswer(roomId, 'NO')} className="flex-1 bg-red-600 hover:bg-red-500 text-white py-3 rounded-xl font-black text-sm md:text-lg shadow-lg flex items-center justify-center gap-2"><ThumbsDown size={18} /> NO</button>
                         </div>
                     )}
 
-                    {/* C/D. MENSAJES DE ESPERA */}
-                    {!isMyTurn && turnPhase === 'asking' && <div className="text-center py-3 text-slate-500 text-xs bg-slate-900/50 rounded-lg border border-slate-800 border-dashed">⏳ Esperando pregunta...</div>}
-                    {isMyTurn && turnPhase === 'answering' && <div className="text-center py-3 text-yellow-500/80 text-xs bg-yellow-900/10 rounded-lg border border-yellow-500/20 animate-pulse">👀 Esperando respuesta...</div>}
+                    {!isWaitingOpponent && !isMyTurn && turnPhase === 'asking' && <div className="text-center py-3 text-slate-500 text-xs bg-slate-900/50 rounded-lg border border-slate-800 border-dashed">⏳ Esperando pregunta...</div>}
+                    {!isWaitingOpponent && isMyTurn && turnPhase === 'answering' && <div className="text-center py-3 text-yellow-500/80 text-xs bg-yellow-900/10 rounded-lg border border-yellow-500/20 animate-pulse">👀 Esperando respuesta...</div>}
+
+                    {/* Mensaje fijo si está esperando en la barra inferior (solo estetico) */}
+                    {isWaitingOpponent && <div className="text-center py-3 text-blue-400 text-xs bg-blue-900/20 rounded-lg border border-blue-800 animate-pulse">Esperando que se una el Jugador 2...</div>}
                 </div>
             </aside>
         </div>

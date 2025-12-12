@@ -96,8 +96,8 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
     }
 
     return (
-        // USA 100dvh PARA EVITAR PROBLEMAS CON LA BARRA DE NAVEGACIÓN MOVIL
-        <div className="flex h-[100dvh] w-full flex-col md:flex-row bg-slate-950 text-white overflow-hidden">
+        // FIX 1: Contenedor principal con 100dvh y overflow-hidden para evitar scroll del body
+        <div className="flex h-[100dvh] w-full flex-col md:flex-row bg-slate-950 text-white overflow-hidden relative">
             <GuessModal isOpen={isGuessModalOpen} onClose={() => setIsGuessModalOpen(false)} onGuess={handleGuess} board={board} />
 
             {/* --- SIDEBAR DESKTOP (Sin cambios) --- */}
@@ -127,17 +127,18 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
             </aside>
 
             {/* --- CENTRO: TABLERO --- */}
-            <div className="flex flex-1 flex-col min-w-0 relative h-full">
+            {/* FIX 2: Quitamos 'h-full', usamos 'flex-1' y 'min-h-0' para que se adapte al espacio que sobra */}
+            <div className="flex flex-1 flex-col min-h-0 relative">
 
-                {/* HEADER MOBILE OPTIMIZADO: Menos padding, altura justa */}
-                <header className="flex md:hidden h-14 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900 px-3 z-30">
+                {/* HEADER MOBILE: Ahora es más visible y robusto */}
+                <header className="flex md:hidden h-14 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900 px-3 z-30 shadow-md">
                     <div className="flex flex-col items-start justify-center" onClick={handleCopyLink}>
                         <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none">SALA</span>
                         <span className="text-2xl font-black text-yellow-400 font-mono tracking-widest leading-none active:scale-95 transition-transform">{roomCode}</span>
                     </div>
 
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1 pr-2 rounded-lg border border-slate-700">
-                        <div className="relative h-7 w-7 overflow-hidden rounded bg-slate-700 border border-yellow-500/50">
+                        <div className="relative h-8 w-8 overflow-hidden rounded bg-slate-700 border border-yellow-500/50">
                             <Image src={mySecret.image} alt="Secret" fill className="object-cover" />
                         </div>
                         <div className="flex flex-col leading-none">
@@ -147,15 +148,15 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
                     </div>
                 </header>
 
-                {/* STATUS BAR COMPACTA */}
+                {/* STATUS BAR */}
                 <div className={`
-          flex shrink-0 items-center justify-center gap-2 py-1.5 text-xs md:text-sm font-bold uppercase tracking-wider shadow-md z-20 transition-colors duration-500
+          flex shrink-0 items-center justify-center gap-2 py-2 text-xs md:text-sm font-bold uppercase tracking-wider shadow-md z-20 transition-colors duration-500
           ${isWaitingOpponent ? 'bg-blue-600' : isMyTurn ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400'}
         `}>
                     {isWaitingOpponent ? <>⏳ Esperando oponente...</> : isMyTurn ? <>🟢 Tu turno</> : <>🔴 Turno Rival</>}
                 </div>
 
-                {/* BOARD: PADDING REDUCIDO EN MOBILE */}
+                {/* BOARD */}
                 <main className="flex-1 overflow-y-auto bg-slate-950 p-1 md:p-4">
                     <div className="mx-auto grid max-w-4xl grid-cols-3 gap-1.5 md:gap-4 md:grid-cols-4 lg:grid-cols-5 pb-2">
                         {board.map((char) => (
@@ -170,8 +171,9 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
                 </main>
             </div>
 
-            {/* --- DERECHA (MOBILE BOTTOM): REDUCIDO A 30vh --- */}
-            <aside className="flex h-[30vh] md:h-auto md:w-80 w-full flex-col border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900 shrink-0 z-20">
+            {/* --- DERECHA (MOBILE BOTTOM) --- */}
+            {/* FIX 3: Ajustamos altura a 35% máximo en mobile */}
+            <aside className="flex h-[35vh] md:h-auto md:w-80 w-full flex-col border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900 shrink-0 z-20 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
                 <div className="p-2 border-b border-slate-800 flex items-center justify-between gap-2 shrink-0">
                     <div className="flex items-center gap-2 text-xs font-bold text-slate-400 px-2"><User size={14} /> Chat</div>
                     {isMyTurn && turnPhase === 'asking' && (
@@ -205,7 +207,7 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
                     <div ref={chatEndRef} />
                 </div>
 
-                {/* INPUTS COMPACTOS */}
+                {/* INPUTS */}
                 <div className="p-2 bg-slate-950 border-t border-slate-800 shrink-0">
                     {!isWaitingOpponent && isMyTurn && turnPhase === 'asking' && (
                         <form onSubmit={async (e) => { e.preventDefault(); if (!msgInput.trim()) return; const text = msgInput; setMsgInput(''); await sendQuestion(roomId, text); }} className="flex gap-2">

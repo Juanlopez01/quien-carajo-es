@@ -7,6 +7,7 @@ import CharacterCard from '@/components/game/CharacterCard'
 import GuessModal from '@/components/game/GuessModal'
 import { useGameStore } from '@/store/useGameStore'
 import { useRealtimeGame } from '@/hooks/useRealtimeGame'
+import useSound from '@/hooks/useSound' // <--- Hook de sonido
 import { sendQuestion, sendAnswer, guessCharacter } from '@/app/actions/game-actions'
 import Image from 'next/image'
 import { Send, User, ThumbsUp, ThumbsDown, AlertTriangle, Trophy, Skull, MessageCircle, Copy, Check } from 'lucide-react'
@@ -29,14 +30,46 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
     const [copied, setCopied] = useState(false)
     const chatEndRef = useRef<HTMLDivElement>(null)
 
+    // --- SONIDOS ---
+    const playWin = useSound('/win.mp3', 0.6)
+    const playLose = useSound('/lose.wav', 0.6)
+    const playTurnAlert = useSound('/turn.wav', 0.4)
+
     const isMyTurn = currentTurn === userId
     const isWaitingOpponent = status === 'waiting'
     const isFinished = status === 'finished'
 
+    // Auto-scroll del chat
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
 
+    // --- EFECTOS DE SONIDO ---
+
+    // 1. Alerta de Turno
+    useEffect(() => {
+        if (isMyTurn && !isWaitingOpponent && !isFinished) {
+            playTurnAlert()
+        }
+    }, [isMyTurn, isWaitingOpponent, isFinished, playTurnAlert])
+
+    // 2. Fin de Partida (Sonido + Confeti)
+    useEffect(() => {
+        if (status === 'finished' && winnerId) {
+            const IWon = winnerId === userId
+            if (IWon) {
+                playWin()
+                // Disparar confeti
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6, x: 0.1 }, colors: ['#FACC15', '#ffffff', '#38bdf8'] })
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6, x: 0.9 }, colors: ['#FACC15', '#ffffff', '#38bdf8'] })
+            } else {
+                playLose()
+            }
+        }
+    }, [status, winnerId, userId, playWin, playLose])
+
+
+    // --- HELPERS ---
     const getInviteLink = () => typeof window !== 'undefined' ? `${window.location.origin}/game/${roomCode}` : ''
 
     const handleWhatsApp = () => {
@@ -60,12 +93,9 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
         await guessCharacter(roomId, charId)
     }
 
+    // --- RENDER: GAME OVER ---
     if (isFinished) {
         const IWon = winnerId === userId
-        if (IWon) {
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6, x: 0.1 }, colors: ['#FACC15', '#ffffff', '#38bdf8'] })
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6, x: 0.9 }, colors: ['#FACC15', '#ffffff', '#38bdf8'] })
-        }
         return (
             <div className="flex h-[100dvh] w-full flex-col items-center justify-center bg-slate-950 text-white p-4 overflow-hidden">
                 <div className="text-center space-y-6 animate-in zoom-in duration-500 relative z-10">
@@ -95,12 +125,12 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
         )
     }
 
+    // --- RENDER: MAIN GAME ---
     return (
-        // FIX 1: Contenedor principal con 100dvh y overflow-hidden para evitar scroll del body
         <div className="flex h-[100dvh] w-full flex-col md:flex-row bg-slate-950 text-white overflow-hidden relative">
             <GuessModal isOpen={isGuessModalOpen} onClose={() => setIsGuessModalOpen(false)} onGuess={handleGuess} board={board} />
 
-            {/* --- SIDEBAR DESKTOP (Sin cambios) --- */}
+            {/* --- SIDEBAR DESKTOP --- */}
             <aside className="hidden md:flex w-72 flex-col items-center border-r border-slate-800 bg-slate-900 p-6 z-10 shrink-0">
                 <h1 className="mb-6 text-2xl font-black text-yellow-400 uppercase text-center leading-none">Quién<br />Carajo<br />Es?</h1>
                 <div className="w-full space-y-2 rounded-xl bg-black/20 p-4 border border-slate-800 mb-6">
@@ -110,6 +140,8 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
                     </div>
                     <div className="text-center font-bold uppercase text-white">{mySecret.name}</div>
                 </div>
+
+                {/* Invitación Desktop */}
                 {isWaitingOpponent && (
                     <div className="w-full animate-pulse space-y-3 mb-6">
                         <div className="text-xs text-center text-slate-400 uppercase tracking-widest">Invitar Amigo</div>
@@ -117,6 +149,7 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
                         <button onClick={handleCopyLink} className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors border border-slate-700">{copied ? <Check size={20} className="text-green-400" /> : <Copy size={20} />}{copied ? "¡Copiado!" : "Copiar Link"}</button>
                     </div>
                 )}
+
                 <div className="mt-auto w-full">
                     <div className="w-full rounded-xl bg-slate-950 p-4 border-2 border-slate-800 text-center shadow-inner group cursor-pointer hover:border-yellow-500/50 transition-colors" onClick={handleCopyLink}>
                         <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">Código de Sala</p>
@@ -127,10 +160,9 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
             </aside>
 
             {/* --- CENTRO: TABLERO --- */}
-            {/* FIX 2: Quitamos 'h-full', usamos 'flex-1' y 'min-h-0' para que se adapte al espacio que sobra */}
             <div className="flex flex-1 flex-col min-h-0 relative">
 
-                {/* HEADER MOBILE: Ahora es más visible y robusto */}
+                {/* HEADER MOBILE */}
                 <header className="flex md:hidden h-14 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900 px-3 z-30 shadow-md">
                     <div className="flex flex-col items-start justify-center" onClick={handleCopyLink}>
                         <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-none">SALA</span>
@@ -172,7 +204,6 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
             </div>
 
             {/* --- DERECHA (MOBILE BOTTOM) --- */}
-            {/* FIX 3: Ajustamos altura a 35% máximo en mobile */}
             <aside className="flex h-[35vh] md:h-auto md:w-80 w-full flex-col border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900 shrink-0 z-20 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
                 <div className="p-2 border-b border-slate-800 flex items-center justify-between gap-2 shrink-0">
                     <div className="flex items-center gap-2 text-xs font-bold text-slate-400 px-2"><User size={14} /> Chat</div>
@@ -185,6 +216,7 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
 
                 {/* CHAT AREA */}
                 <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-slate-900/50">
+                    {/* Invitación Mobile (si nadie se unió) */}
                     {isWaitingOpponent && (
                         <div className="flex flex-col items-center justify-center h-full space-y-2 animate-in zoom-in duration-300">
                             <p className="text-center text-xs text-slate-400 max-w-[200px]">Nadie se unió todavía.</p>
@@ -209,6 +241,7 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
 
                 {/* INPUTS */}
                 <div className="p-2 bg-slate-950 border-t border-slate-800 shrink-0">
+                    {/* A. Preguntar */}
                     {!isWaitingOpponent && isMyTurn && turnPhase === 'asking' && (
                         <form onSubmit={async (e) => { e.preventDefault(); if (!msgInput.trim()) return; const text = msgInput; setMsgInput(''); await sendQuestion(roomId, text); }} className="flex gap-2">
                             <input autoFocus type="text" value={msgInput} onChange={(e) => setMsgInput(e.target.value)} placeholder="¿Tiene sombrero?" className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:border-yellow-400 outline-none transition-colors" />
@@ -216,6 +249,7 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
                         </form>
                     )}
 
+                    {/* B. Responder */}
                     {!isWaitingOpponent && !isMyTurn && turnPhase === 'answering' && (
                         <div className="flex gap-2">
                             <button onClick={() => sendAnswer(roomId, 'SÍ')} className="flex-1 bg-green-600 hover:bg-green-500 text-white py-2 rounded-lg font-black text-sm shadow-lg flex items-center justify-center gap-1"><ThumbsUp size={16} /> SÍ</button>
@@ -223,6 +257,7 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
                         </div>
                     )}
 
+                    {/* C. Mensajes de Estado */}
                     {!isWaitingOpponent && !isMyTurn && turnPhase === 'asking' && <div className="text-center py-2 text-slate-500 text-[10px] bg-slate-900/50 rounded border border-slate-800 border-dashed">⏳ Esperando pregunta...</div>}
                     {!isWaitingOpponent && isMyTurn && turnPhase === 'answering' && <div className="text-center py-2 text-yellow-500/80 text-[10px] bg-yellow-900/10 rounded border border-yellow-500/20 animate-pulse">👀 Esperando respuesta...</div>}
 

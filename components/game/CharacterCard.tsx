@@ -1,10 +1,9 @@
-// components/game/CharacterCard.tsx
 'use client'
 
 import Image from 'next/image'
-import { motion } from 'framer-motion'
 import { Character } from '@/lib/data/characters'
 import { clsx } from 'clsx'
+import useSound from '@/hooks/useSound' // <--- 1. Importar
 
 interface Props {
     character: Character
@@ -13,55 +12,53 @@ interface Props {
 }
 
 export default function CharacterCard({ character, isDiscarded, onClick }: Props) {
+    // 2. Inicializar el sonido de click (volumen 0.4 suave)
+    const playClick = useSound('/click.wav', 0.4);
+
     return (
-        <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onClick}
+        <div
+            onClick={() => {
+                playClick(); // <--- 3. Reproducir al hacer click
+                onClick();   // Ejecutar la lógica original
+            }}
             className={clsx(
-                "relative aspect-[3/4] cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-300",
-                // Estilos condicionales: Si está descartado, gris y opaco. Si no, borde amarillo activo.
+                "group relative aspect-[3/4] cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-200 shadow-sm active:scale-95",
                 isDiscarded
-                    ? "border-slate-700 bg-slate-800 grayscale opacity-60"
-                    : "border-yellow-400 bg-slate-900 shadow-lg shadow-yellow-900/20"
+                    ? "border-slate-800 bg-slate-900 grayscale opacity-50 hover:opacity-70"
+                    : "border-yellow-500/30 bg-slate-900 hover:border-yellow-400 hover:shadow-md hover:shadow-yellow-900/20 hover:-translate-y-0.5"
             )}
         >
-            {/* Imagen del Personaje */}
-            <div className="relative h-4/5 w-full">
-                {/* Placeholder mientras no tengas las fotos reales */}
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-800 text-xs text-slate-500">
-                    Sin Foto
-                </div>
+            {/* Fondo por si falla la imagen */}
+            <div className="absolute inset-0 bg-slate-800 animate-pulse" />
 
-                <Image
-                    src={character.image}
-                    alt={character.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 33vw, 15vw"
-                    // Esto evita errores si la imagen no existe aún
-                    onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                    }}
-                />
+            <Image
+                src={character.image}
+                alt={character.name}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105 relative z-0"
+                sizes="(max-width: 768px) 33vw, 20vw"
+                priority={character.id === 'messi' || character.id === 'maradona'}
+            />
 
-                {/* Cruz roja si está descartado (Opcional, queda muy visual) */}
-                {isDiscarded && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                        <span className="text-6xl font-bold text-red-600/80">❌</span>
-                    </div>
-                )}
-            </div>
-
-            {/* Nombre */}
-            <div className="flex h-1/5 items-center justify-center bg-slate-950 p-1">
+            {/* Gradiente y Nombre */}
+            <div className={clsx(
+                "absolute inset-0 flex items-end justify-center p-1.5 z-10 transition-colors",
+                isDiscarded ? "bg-black/60" : "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
+            )}>
                 <span className={clsx(
-                    "text-center text-xs font-bold leading-tight uppercase sm:text-sm",
-                    isDiscarded ? "text-slate-500 line-through" : "text-white"
+                    "text-[9px] md:text-[11px] font-bold uppercase text-center leading-tight truncate w-full",
+                    isDiscarded ? "text-slate-400 line-through decoration-2" : "text-white group-hover:text-yellow-300"
                 )}>
                     {character.name}
                 </span>
             </div>
-        </motion.div>
+
+            {/* Cruz Roja (Opcional) */}
+            {isDiscarded && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                    <span className="text-4xl opacity-40 text-red-600 select-none">❌</span>
+                </div>
+            )}
+        </div>
     )
 }

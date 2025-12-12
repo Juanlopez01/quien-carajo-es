@@ -6,7 +6,7 @@ export interface Character {
 
 export const CHARACTERS: Character[] = [
     // --- DEPORTES ---
-    { id: 'messi', name: 'Lionel Messi', image: 'https://c4.wallpaperflare.com/wallpaper/1001/743/752/argentina-fifa-world-cup-lionel-messi-hd-wallpaper-preview.jpg' },
+    { id: 'messi', name: 'Lionel Messi', image: 'https://cdn.britannica.com/35/238335-050-2CB2EB8A/Lionel-Messi-Argentina-Netherlands-World-Cup-Qatar-2022.jpg' },
     { id: 'maradona', name: 'Diego Maradona', image: 'https://res.cloudinary.com/dg0okhqyc/image/upload/v1765476040/Gemini_Generated_Image_8enm3y8enm3y8enm_znyotg.png' },
     { id: 'dibu', name: 'Dibu Martínez', image: 'https://intn24.lalr.co/cms/2024/07/05131615/EmilianoDibumartinezAFP.jpg' },
     { id: 'scaloni', name: 'Lionel Scaloni', image: 'https://i.pinimg.com/736x/26/69/f7/2669f7b8a2e3c441cef418651987410a.jpg' },
@@ -39,7 +39,7 @@ export const CHARACTERS: Character[] = [
     // --- FICCIÓN & MEMES ---
     { id: 'tinelli', name: 'M. Tinelli', image: 'https://www.infohd.com.ar/wp-content/uploads/2021/03/MarceloTinelli1.jpg' },
     { id: 'moni', name: 'Moni Argento', image: 'https://nexodiario.com/wp-content/uploads/2018/02/moni-argento.jpg' },
-    { id: 'bananero', name: 'El Bananero', image: 'https://imgs.elpais.com.uy/dims4/default/b81489e/2147483647/strip/false/crop/607x476+0+0/resize/1200x941!/quality/90/?url=https%3A%2F%2Fel-pais-uruguay-production-web.s3.us-east-1.amazonaws.com%2Fbrightspot%2Ff9%2Fae%2F447bcd6a4585b9c99bebfe53259c%2Fcaptura-de-pantalla-2025-02-13-154954.png' },
+    { id: 'bananero', name: 'El Bananero', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/EL_BANANERO.jpg/960px-EL_BANANERO.jpg' },
     { id: 'caro', name: 'Caro Pardíaco', image: 'https://tn.com.ar/resizer/_MqJZrowfilzNy78PIfr2Bc559o=/arc-anglerfish-arc2-prod-artear/public/CBBHAC7UFRG5DO3WZOU5JS5KCY.png' },
     { id: 'atendedor', name: 'Atendedor Boludos', image: 'https://pbs.twimg.com/media/GHtcJ3hWIAAAgl1.jpg' },
     { id: 'maratea', name: 'Santi Maratea', image: 'https://media.a24.com/p/368ef9a27bc5b805dc7a27ff65002e57/adjuntos/296/imagenes/009/590/0009590769/1200x675/smart/santi-maratea.png' },

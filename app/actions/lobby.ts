@@ -106,3 +106,40 @@ export async function getGamesCount() {
 
     return count || 0
 }
+
+export async function enterRoom(code: string) {
+    const supabase = await createClient()
+
+    // 1. Verificamos quién soy
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('No estás autenticado')
+
+    // 2. Buscamos la sala
+    const { data: room } = await supabase
+        .from('rooms')
+        .select('*')
+        .eq('code', code)
+        .single()
+
+    if (!room) return { error: 'Sala no encontrada' }
+
+    // 3. Si ya soy Player 1 o Player 2, no hago nada (ya estoy adentro)
+    if (room.player_1_id === user.id || room.player_2_id === user.id) {
+        return { success: true }
+    }
+
+    // 4. Si la sala está llena, error
+    if (room.player_2_id) return { error: 'La sala está llena' }
+
+    // 5. Si hay lugar, me meto como Player 2
+    await supabase
+        .from('rooms')
+        .update({
+            player_2_id: user.id,
+            status: 'playing',
+            current_turn: room.player_1_id
+        })
+        .eq('id', room.id)
+
+    return { success: true }
+}

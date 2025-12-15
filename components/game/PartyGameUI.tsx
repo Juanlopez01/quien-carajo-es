@@ -507,7 +507,7 @@ export default function PartyGameUI({ roomId, roomCode, userId, initialParticipa
                             <p className="text-slate-400 text-sm max-w-xs">Respondé en el chat si es <span className="text-green-500 font-bold">SÍ</span> o <span className="text-red-500 font-bold">NO</span>.</p>
                         </div>
                     ) : (
-                        <div className={`mx-auto grid max-w-4xl grid-cols-3 gap-1.5 md:gap-4 md:grid-cols-4 lg:grid-cols-5 pb-20 transition-all duration-500 ${amIEliminated ? 'filter grayscale blur-sm' : ''}`}>
+                        <div className={`mx-auto grid max-w-4xl grid-cols-3 gap-x-2 gap-y-8 md:gap-4 md:grid-cols-4 lg:grid-cols-5 pb-20 pt-2 transition-all duration-500 ${amIEliminated ? 'filter grayscale blur-sm' : ''}`}>
                             {currentBoard.map((char) => (
                                 <div key={char.id} className="relative group">
                                     <CharacterCard
@@ -518,7 +518,7 @@ export default function PartyGameUI({ roomId, roomCode, userId, initialParticipa
                                     {!discardedIds.includes(char.id) && !amIEliminated && (
                                         <button
                                             onClick={(e) => { e.stopPropagation(); attemptGuess(char.id); }}
-                                            className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-20"
+                                            className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-20 whitespace-nowrap border border-slate-900"
                                         >
                                             ARRIESGAR
                                         </button>

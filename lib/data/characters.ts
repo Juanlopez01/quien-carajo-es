@@ -37,7 +37,7 @@ export const CHARACTERS: Character[] = [
     { id: 'francella', name: 'G. Francella', image: 'https://images2.alphacoders.com/139/thumb-1920-1394056.png' }, // NUEVO 🆕 ("Hermosa mañana")
     { id: 'guido', name: 'Guido Kaczka', image: 'https://cloudfront-us-east-1.images.arcpublishing.com/infobae/VXIVWT47MZFMVLCN3TNBLUVUAQ.jpg' },
     { id: 'pampita', name: 'Pampita', image: 'https://lv7.com.ar/wp-content/uploads/2025/09/pampita2.jpg' },
-    { id: 'china', name: 'China Suárez', image: 'https://fotos.perfil.com///2024/10/17/900/0/la-china-suarez-1893819.jpeg' },
+    { id: 'china', name: 'China Suárez', image: 'https://imgs.elpais.com.uy/dims4/default/0b940d7/2147483647/strip/true/crop/1233x848+121+0/resize/1440x990!/quality/90/?url=https%3A%2F%2Fel-pais-uruguay-production-web.s3.us-east-1.amazonaws.com%2Fbrightspot%2Fe0%2Ff3%2F516021914efd9bf8d7cc229310b9%2Fsin-titulo.jpg' },
     { id: 'yanina', name: 'Yanina Latorre', image: 'https://fotos.perfil.com/2025/03/17/0/900/yanina-latorre-1986660.jpg' },
     { id: 'rial', name: 'Jorge Rial', image: 'https://cloudfront-us-east-1.images.arcpublishing.com/infobae/3JMYOK43WZF4NCPJUKYR2STRUM.jpg' },
     { id: 'ventura', name: 'Luis Ventura', image: 'https://d3b5jqy5xuub7g.cloudfront.net/wp-content/uploads/2025/10/COVER-art-LMCA-Luis-Ventura-MF-Streaming-min.png' },
@@ -51,7 +51,7 @@ export const CHARACTERS: Character[] = [
     { id: 'lali', name: 'Lali Espósito', image: 'https://dwgyu36up6iuz.cloudfront.net/heru80fdn/image/upload/c_fill,d_placeholder_voguemexico.png,fl_progressive,g_face,h_1080,q_80,w_1920/v1689193699/voguemexico_secretos-de-belleza-de-lali-esposito-para-un-look-clasico-con-labios-rojos.jpg' }, // NUEVO 🆕
     { id: 'tini', name: 'Tini Stoessel', image: 'https://media.vogue.mx/photos/6169d44bd57872f331cc3228/master/pass/Tini-entrevista-Vogue-M%C3%A9xico.jpg' }, // NUEVO 🆕
     { id: 'rodrigo', name: 'El Potro Rodrigo', image: 'https://media.diariopopular.com.ar/p/7bdc69317a839366a792e46c2204ad1c/adjuntos/143/imagenes/006/798/0006798753/potrojpg.jpg' },
-    { id: 'cerati', name: 'Gustavo Cerati', image: 'https://e1.pxfuel.com/desktop-wallpaper/495/141/desktop-wallpaper-gustavo-cerati-by-didiluv-gustavo-cerati.jpg' },
+    { id: 'cerati', name: 'Gustavo Cerati', image: 'https://blobcore.pulsoslp.com.mx/images/2024/09/04/cerati-es-parte-de-todos-focus-0-0-1044-675.jpg' },
     { id: 'duki', name: 'Duki', image: 'https://images6.alphacoders.com/134/1344142.png' },
     { id: 'lgante', name: 'L-Gante', image: 'https://cloudfront-us-east-1.images.arcpublishing.com/infobae/5A7QJNERTFAMBEXZY5MADSXNGA.jpg' },
     { id: 'mona', name: 'La Mona Jiménez', image: 'https://s3.amazonaws.com/arc-wordpress-client-uploads/infobae-wp/wp-content/uploads/2019/03/31175302/Lollapalooza-2019-Dia-3-Domingo-1.jpg' },
@@ -88,7 +88,7 @@ export const CHARACTERS: Character[] = [
     { id: 'zulma', name: 'Zulma Lobato', image: 'https://lastfm.freetls.fastly.net/i/u/ar0/314f2f08f66444b99d4c0f338e6e5e2f.jpg' },
     { id: 'marley', name: 'Marley', image: 'https://media.a24.com/p/6528bee62e400224269303a12115cb89/adjuntos/296/imagenes/009/395/0009395103/1200x675/smart/marley.png' },
     { id: 'delmoro', name: 'Santiago del Moro', image: 'https://canalc.com.ar/wp-content/uploads/2023/12/tlf_mc_digital_carrousel_del-moro.jpeg' },
-    { id: 'beto', name: 'Beto Casella', image: 'https://www.cronica.com.ar/img/2018/10/07/betocasella_crop1538921245746.jpg' },
+    { id: 'beto', name: 'Beto Casella', image: 'https://www.clarin.com/img/2022/02/10/dX52E_lH-_2000x1500__1.jpg' },
     { id: 'pachano', name: 'Aníbal Pachano', image: 'https://imagenes.montevideo.com.uy/imgnoticias/201206/_W933_80/366445.jpg' },
     { id: 'polino', name: 'Marcelo Polino', image: 'https://s3.amazonaws.com/arc-wordpress-client-uploads/infobae-wp/wp-content/uploads/2019/05/16202021/Marcelo-Polino1.jpg' },
     { id: 'carmen', name: 'Carmen Barbieri', image: 'https://fotos.perfil.com/2025/05/15/trim/950/534/carmen-barbieri-2023640.jpg' },

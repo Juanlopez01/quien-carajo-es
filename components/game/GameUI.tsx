@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import confetti from 'canvas-confetti'
 import { Character } from '@/lib/data/characters'
@@ -132,7 +133,11 @@ export default function GameUI({ roomCode, roomId, userId, board, mySecret, init
 
             {/* --- SIDEBAR DESKTOP --- */}
             <aside className="hidden md:flex w-72 flex-col items-center border-r border-slate-800 bg-slate-900 p-6 z-10 shrink-0">
-                <h1 className="mb-6 text-2xl font-black text-yellow-400 uppercase text-center leading-none">Quién<br />Carajo<br />Es?</h1>
+                <Link href="/">
+                    <h1 className="mb-6 text-2xl font-black text-yellow-400 uppercase text-center leading-none cursor-pointer hover:scale-110 hover:text-yellow-300 transition-all active:scale-95">
+                        Quién<br />Carajo<br />Es?
+                    </h1>
+                </Link>
                 <div className="w-full space-y-2 rounded-xl bg-black/20 p-4 border border-slate-800 mb-6">
                     <div className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">Tu Secreto</div>
                     <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg border-2 border-yellow-500/50 shadow-lg">

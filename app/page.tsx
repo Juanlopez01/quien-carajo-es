@@ -126,9 +126,9 @@ export default function Home() {
         </div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="pt-8">
-          <a href="#" className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#009EE3]/10 hover:bg-[#009EE3]/20 text-[#009EE3] text-sm font-bold transition-all hover:scale-105 border border-[#009EE3]/30">
+          <a href="https://mpago.la/1c94NDG" className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#009EE3]/10 hover:bg-[#009EE3]/20 text-[#009EE3] text-sm font-bold transition-all hover:scale-105 border border-[#009EE3]/30">
             <Coffee size={16} className="group-hover:animate-bounce" />
-            Tirame unos pesos
+            Tirame unos pesos que me ayuda un montón
             <Heart size={12} className="text-red-500 fill-red-500" />
           </a>
         </motion.div>
